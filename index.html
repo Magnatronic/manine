@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Little Hands</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎵</text></svg>">
+    <link rel="stylesheet" href="styles.css">
+    <!-- MediaPipe Hands -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header with controls -->
+        <header class="control-panel">
+            <h1>Little Hands</h1>
+            <div class="controls">
+                <button id="toggleCamera" class="btn primary">Start Camera</button>
+                <button id="togglePreview" class="btn secondary">Hide Preview</button>
+                <button id="clearCanvas" class="btn secondary">Clear Canvas</button>
+                <select id="visualMode" class="mode-selector">
+                    <option value="drawing">Drawing Mode</option>
+                    <option value="particles">Particle Mode</option>
+                    <option value="shapes">Shape Mode</option>
+                </select>
+                <select id="handMode" class="hand-selector">
+                    <option value="dual">Dual Hand Mode</option>
+                    <option value="single">Single Hand Mode</option>
+                </select>
+            </div>
+        </header>
+
+        <!-- Main visualization area -->
+        <main class="visualization-area">
+            <div class="canvas-container">
+                <video id="inputVideo" autoplay muted playsinline style="display: none;"></video>
+                <canvas id="outputCanvas" class="output-canvas"></canvas>
+                <canvas id="visualCanvas" class="visual-canvas"></canvas>
+                
+                <!-- Camera preview overlay -->
+                <div id="cameraPreview" class="camera-preview">
+                    <video id="previewVideo" class="preview-video" autoplay muted playsinline></video>
+                    <div class="preview-status">
+                        <p class="zone-status" id="zoneStatus">Camera preview</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hand tracking status -->
+            <div id="statusPanel" class="status-panel">
+                <div class="status-item">
+                    <span class="status-label">Camera:</span>
+                    <span id="cameraStatus" class="status-value">Not Connected</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Hands Detected:</span>
+                    <span id="handsStatus" class="status-value">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Mode:</span>
+                    <span id="modeStatus" class="status-value">Drawing</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Settings panel -->
+        <aside class="settings-panel" id="settingsPanel">
+            <h3>Settings</h3>
+            
+            <div class="setting-group">
+                <label for="sensitivity">Movement Sensitivity</label>
+                <input type="range" id="sensitivity" min="0.1" max="2.0" value="1.0" step="0.1">
+                <span id="sensitivityValue">1.0</span>
+            </div>
+            
+            <div class="setting-group">
+                <label for="trailLength">Trail Length</label>
+                <input type="range" id="trailLength" min="10" max="100" value="50" step="5">
+                <span id="trailLengthValue">50</span>
+            </div>
+            
+            <div class="setting-group">
+                <label for="brushSize">Brush Size</label>
+                <input type="range" id="brushSize" min="5" max="50" value="15" step="2">
+                <span id="brushSizeValue">15</span>
+            </div>
+            
+            <div class="setting-group">
+                <label for="colorMode">Color Mode</label>
+                <select id="colorMode">
+                    <option value="rainbow">Rainbow</option>
+                    <option value="speed">Speed-based</option>
+                    <option value="position">Position-based</option>
+                    <option value="audio">Audio-responsive</option>
+                </select>
+            </div>
+            
+            <div class="setting-group">
+                <input type="checkbox" id="audioEnabled">
+                <label for="audioEnabled">Enable Audio Input</label>
+            </div>
+            
+            <div class="setting-group">
+                <input type="checkbox" id="symmetryMode">
+                <label for="symmetryMode">Symmetry Mode (Bilateral Coordination)</label>
+            </div>
+        </aside>
+
+        <!-- Toggle settings button -->
+        <button id="toggleSettings" class="settings-toggle">⚙️</button>
+    </div>
+
+    <!-- Loading screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <p>Initializing hand tracking...</p>
+            <p class="loading-details">Please allow camera access when prompted</p>
+        </div>
+    </div>
+
+    <!-- Error modal -->
+    <div id="errorModal" class="modal hidden">
+        <div class="modal-content">
+            <h3>Error</h3>
+            <p id="errorMessage"></p>
+            <button id="closeError" class="btn primary">OK</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="modules/handTracking.js"></script>
+    <script src="modules/visualEffects.js"></script>
+    <script src="modules/audioProcessor.js"></script>
+    <script src="modules/therapeuticActivities.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

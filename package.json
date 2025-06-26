@@ -1,0 +1,46 @@
+{
+  "name": "music-therapy-movement-visualizer",
+  "version": "1.0.0",
+  "description": "A web-based movement visualization application for music therapy sessions with students who have disabilities",
+  "main": "app.js",
+  "scripts": {
+    "start": "npx live-server --port=8080 --open=/index.html",
+    "dev": "npx live-server --port=3000 --open=/index.html --watch=./",
+    "test": "echo \"No tests yet - this is a browser-based application\"",
+    "build": "echo \"No build process needed - vanilla HTML/CSS/JS\"",
+    "deploy": "echo \"Deploy to GitHub Pages or any web server\""
+  },
+  "keywords": [
+    "music-therapy",
+    "movement-visualization",
+    "accessibility",
+    "hand-tracking",
+    "mediapipe",
+    "disabilities",
+    "web-audio",
+    "canvas",
+    "therapeutic"
+  ],
+  "author": "Music Therapy Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/music-therapy-movement-visualizer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/music-therapy-movement-visualizer/issues"
+  },
+  "homepage": "https://yourusername.github.io/music-therapy-movement-visualizer",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "Chrome >= 80",
+    "Firefox >= 75",
+    "Safari >= 13",
+    "Edge >= 80"
+  ]
+}
