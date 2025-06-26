@@ -10,7 +10,7 @@ A web-based movement visualization application designed specifically for music t
 - **Audio Responsiveness**: Microphone input creates visual effects synchronized with music
 - **Accessibility Focused**: Designed for students with varying physical abilities
 
-### Therapeutic Features
+### Therapeutic Uses
 - **Bilateral Coordination**: Activities that encourage both hands working together
 - **Cause and Effect**: Immediate visual feedback for every movement
 - **Large Movement Rewards**: Bigger gestures create more dramatic effects
@@ -36,10 +36,17 @@ A web-based movement visualization application designed specifically for music t
 
 ## Quick Start
 
+### Live Demo
+🌐 **[Try Little Hands Online](https://magnatronic.github.io/manine/)**
+
+The app is automatically deployed to GitHub Pages and ready to use immediately.
+
+### Local Development
+
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/music-therapy-app.git
-   cd music-therapy-app
+   git clone https://github.com/Magnatronic/manine.git
+   cd manine
    ```
 
 2. **Open in a web server**
@@ -149,10 +156,22 @@ music-therapy-app/
 
 ## Deployment
 
-### GitHub Pages
-1. Push code to GitHub repository
-2. Enable GitHub Pages in repository settings
-3. Access via `https://yourusername.github.io/music-therapy-app`
+### GitHub Pages (Automated)
+The application is automatically deployed to GitHub Pages using GitHub Actions:
+
+1. **Automatic Deployment**: Every push to the `main` branch triggers automatic deployment
+2. **Live URL**: https://magnatronic.github.io/manine/
+3. **No Build Required**: Static files are deployed directly
+4. **GitHub Actions**: See `.github/workflows/deploy.yml` for the deployment workflow
+
+### Manual Deployment to GitHub Pages
+1. Fork or clone the repository
+2. Enable GitHub Pages in repository settings:
+   - Go to Settings → Pages
+   - Source: Deploy from a branch
+   - Branch: gh-pages (created automatically by GitHub Actions)
+3. Push code to the `main` branch to trigger deployment
+4. Access via `https://yourusername.github.io/repositoryname`
 
 ### Web Server
 1. Upload files to any web server
