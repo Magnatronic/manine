@@ -80,16 +80,25 @@ class HandTracker {
         try {
             let frameCount = 0;
             
+            // Get camera stream first
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: 1280,
+                    height: 720,
+                    facingMode: 'user'
+                }
+            });
+            
+            // Set up preview video if provided
+            if (previewElement) {
+                previewElement.srcObject = stream;
+            }
+            
             this.camera = new Camera(videoElement, {
                 onFrame: async () => {
                     frameCount++;
                     if (frameCount % 300 === 0) { // Log every 300 frames (about once per 5 seconds)
                         console.log(`Camera frame ${frameCount}: sending to MediaPipe`);
-                    }
-                    
-                    // Copy video stream to preview element if provided
-                    if (previewElement && videoElement.srcObject) {
-                        previewElement.srcObject = videoElement.srcObject;
                     }
                     
                     if (this.hands && this.isTracking) {

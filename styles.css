@@ -417,6 +417,16 @@ body {
     transform: scaleX(-1); /* Mirror the video for natural hand positioning */
 }
 
+.preview-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    transform: scaleX(-1); /* Mirror the canvas to match the video */
+}
+
 .preview-status {
     position: absolute;
     bottom: 10px;

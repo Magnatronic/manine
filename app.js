@@ -23,6 +23,7 @@ class MusicTherapyApp {
             // Camera preview elements
             cameraPreview: document.getElementById('cameraPreview'),
             previewVideo: document.getElementById('previewVideo'),
+            previewCanvas: document.getElementById('previewCanvas'),
             zoneStatus: document.getElementById('zoneStatus'),
             togglePreview: document.getElementById('togglePreview'),
             
@@ -421,9 +422,10 @@ class MusicTherapyApp {
     }
     
     /**
-     * Draw hand landmarks on overlay canvas
+     * Draw hand landmarks on overlay canvas and preview canvas
      */
     drawHandLandmarks(hands) {
+        // Draw on main output canvas
         const canvas = this.elements.outputCanvas;
         const ctx = canvas.getContext('2d');
         
@@ -471,8 +473,118 @@ class MusicTherapyApp {
         }
         
         ctx.globalAlpha = 1.0;
+        
+        // Also draw on preview canvas for diagnostic purposes
+        this.drawPreviewLandmarks(hands);
     }
     
+    /**
+     * Draw hand landmarks on preview canvas for diagnostic purposes
+     */
+    drawPreviewLandmarks(hands) {
+        const canvas = this.elements.previewCanvas;
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size to match preview video
+        if (canvas.width !== 320 || canvas.height !== 240) {
+            canvas.width = 320;
+            canvas.height = 240;
+        }
+        
+        // Clear previous drawings
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (!hands || hands.length === 0) return;
+        
+        // Hand landmark connections (simplified skeleton)
+        const connections = [
+            [0, 1], [1, 2], [2, 3], [3, 4], // Thumb
+            [0, 5], [5, 6], [6, 7], [7, 8], // Index
+            [0, 9], [9, 10], [10, 11], [11, 12], // Middle
+            [0, 13], [13, 14], [14, 15], [15, 16], // Ring
+            [0, 17], [17, 18], [18, 19], [19, 20], // Pinky
+            [5, 9], [9, 13], [13, 17] // Palm connections
+        ];
+        
+        for (const hand of hands) {
+            const landmarks = hand.landmarks;
+            const confidence = hand.confidence;
+            
+            // Choose colors based on confidence and hand
+            const handColor = hand.label === 'left' ? '#4ecdc4' : '#ff6b6b';
+            const confidenceColor = confidence > 0.8 ? '#00ff00' : confidence > 0.6 ? '#ffff00' : '#ff0000';
+            
+            // Draw connections (skeleton)
+            ctx.strokeStyle = handColor;
+            ctx.lineWidth = 2;
+            ctx.globalAlpha = 0.7;
+            
+            ctx.beginPath();
+            for (const [start, end] of connections) {
+                if (landmarks[start] && landmarks[end]) {
+                    const startX = landmarks[start].x * canvas.width;
+                    const startY = landmarks[start].y * canvas.height;
+                    const endX = landmarks[end].x * canvas.width;
+                    const endY = landmarks[end].y * canvas.height;
+                    
+                    ctx.moveTo(startX, startY);
+                    ctx.lineTo(endX, endY);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw landmarks (joints)
+            for (let i = 0; i < landmarks.length; i++) {
+                const landmark = landmarks[i];
+                const x = landmark.x * canvas.width;
+                const y = landmark.y * canvas.height;
+                
+                // Different sizes for different landmark types
+                let radius = 3;
+                if (i === 0) radius = 6; // Wrist - larger
+                if ([4, 8, 12, 16, 20].includes(i)) radius = 5; // Fingertips - medium
+                
+                // Draw landmark
+                ctx.fillStyle = confidenceColor;
+                ctx.globalAlpha = 0.9;
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                ctx.fill();
+                
+                // Draw small outline
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.globalAlpha = 1;
+                ctx.stroke();
+            }
+            
+            // Draw hand label and confidence
+            const centerX = hand.center.x * canvas.width;
+            const centerY = hand.center.y * canvas.height;
+            
+            ctx.fillStyle = handColor;
+            ctx.globalAlpha = 1;
+            ctx.font = 'bold 12px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${hand.label.toUpperCase()}`, centerX, centerY - 20);
+            ctx.font = '10px Arial';
+            ctx.fillText(`${(confidence * 100).toFixed(0)}%`, centerX, centerY - 8);
+            
+            // Draw gesture indicator
+            if (hand.gestures.isPointing) {
+                ctx.fillText('👉 POINTING', centerX, centerY + 15);
+            } else if (hand.gestures.isFist) {
+                ctx.fillText('✊ FIST', centerX, centerY + 15);
+            } else if (hand.gestures.isOpen) {
+                ctx.fillText('✋ OPEN', centerX, centerY + 15);
+            } else if (hand.gestures.isPinching) {
+                ctx.fillText('🤏 PINCH', centerX, centerY + 15);
+            }
+        }
+        
+        ctx.globalAlpha = 1;
+    }
+
     /**
      * Event handlers
      */
