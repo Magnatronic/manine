@@ -483,18 +483,58 @@ class MusicTherapyApp {
      */
     drawPreviewLandmarks(hands) {
         const canvas = this.elements.previewCanvas;
+        const video = this.elements.previewVideo;
         const ctx = canvas.getContext('2d');
         
-        // Set canvas size to match preview video
-        if (canvas.width !== 320 || canvas.height !== 240) {
-            canvas.width = 320;
-            canvas.height = 240;
+        // Get the actual displayed size of the video element
+        const videoRect = video.getBoundingClientRect();
+        const canvasRect = canvas.getBoundingClientRect();
+        
+        // Set canvas size to match the actual display size
+        if (canvas.width !== canvasRect.width || canvas.height !== canvasRect.height) {
+            canvas.width = canvasRect.width;
+            canvas.height = canvasRect.height;
         }
         
         // Clear previous drawings
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         if (!hands || hands.length === 0) return;
+        
+        // Calculate scaling factors for object-fit: cover
+        // MediaPipe coordinates are normalized (0-1) based on the actual video stream
+        // but the displayed video may be cropped/scaled
+        const videoAspectRatio = video.videoWidth / video.videoHeight;
+        const displayAspectRatio = canvas.width / canvas.height;
+        
+        let scaleX = 1;
+        let scaleY = 1;
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        if (videoAspectRatio > displayAspectRatio) {
+            // Video is wider - will be cropped horizontally
+            scaleY = 1;
+            scaleX = displayAspectRatio / videoAspectRatio;
+            offsetX = (1 - scaleX) / 2;
+        } else {
+            // Video is taller - will be cropped vertically  
+            scaleX = 1;
+            scaleY = videoAspectRatio / displayAspectRatio;
+            offsetY = (1 - scaleY) / 2;
+        }
+        
+        // Helper function to transform MediaPipe coordinates to display coordinates
+        const transformCoord = (x, y) => {
+            // Apply scaling and offset to account for object-fit: cover
+            const scaledX = (x - offsetX) / scaleX;
+            const scaledY = (y - offsetY) / scaleY;
+            
+            return {
+                x: scaledX * canvas.width,
+                y: scaledY * canvas.height
+            };
+        };
         
         // Hand landmark connections (simplified skeleton)
         const connections = [
@@ -522,13 +562,12 @@ class MusicTherapyApp {
             ctx.beginPath();
             for (const [start, end] of connections) {
                 if (landmarks[start] && landmarks[end]) {
-                    const startX = landmarks[start].x * canvas.width;
-                    const startY = landmarks[start].y * canvas.height;
-                    const endX = landmarks[end].x * canvas.width;
-                    const endY = landmarks[end].y * canvas.height;
+                    // Transform MediaPipe coordinates to display coordinates
+                    const startPos = transformCoord(landmarks[start].x, landmarks[start].y);
+                    const endPos = transformCoord(landmarks[end].x, landmarks[end].y);
                     
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(endX, endY);
+                    ctx.moveTo(startPos.x, startPos.y);
+                    ctx.lineTo(endPos.x, endPos.y);
                 }
             }
             ctx.stroke();
@@ -536,8 +575,8 @@ class MusicTherapyApp {
             // Draw landmarks (joints)
             for (let i = 0; i < landmarks.length; i++) {
                 const landmark = landmarks[i];
-                const x = landmark.x * canvas.width;
-                const y = landmark.y * canvas.height;
+                // Transform MediaPipe coordinates to display coordinates
+                const pos = transformCoord(landmark.x, landmark.y);
                 
                 // Different sizes for different landmark types
                 let radius = 3;
@@ -548,7 +587,7 @@ class MusicTherapyApp {
                 ctx.fillStyle = confidenceColor;
                 ctx.globalAlpha = 0.9;
                 ctx.beginPath();
-                ctx.arc(x, y, radius, 0, 2 * Math.PI);
+                ctx.arc(pos.x, pos.y, radius, 0, 2 * Math.PI);
                 ctx.fill();
                 
                 // Draw small outline
@@ -558,27 +597,30 @@ class MusicTherapyApp {
                 ctx.stroke();
             }
             
-            // Draw hand label and confidence
-            const centerX = hand.center.x * canvas.width;
-            const centerY = hand.center.y * canvas.height;
+            // Calculate hand center from landmarks for preview (not using hand.center which is mirrored)
+            const wrist = landmarks[0];
+            const middleBase = landmarks[9];
+            const centerX = (wrist.x + middleBase.x) / 2;
+            const centerY = (wrist.y + middleBase.y) / 2;
+            const centerPos = transformCoord(centerX, centerY);
             
             ctx.fillStyle = handColor;
             ctx.globalAlpha = 1;
             ctx.font = 'bold 12px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText(`${hand.label.toUpperCase()}`, centerX, centerY - 20);
+            ctx.fillText(`${hand.label.toUpperCase()}`, centerPos.x, centerPos.y - 20);
             ctx.font = '10px Arial';
-            ctx.fillText(`${(confidence * 100).toFixed(0)}%`, centerX, centerY - 8);
+            ctx.fillText(`${(confidence * 100).toFixed(0)}%`, centerPos.x, centerPos.y - 8);
             
             // Draw gesture indicator
             if (hand.gestures.isPointing) {
-                ctx.fillText('👉 POINTING', centerX, centerY + 15);
+                ctx.fillText('👉 POINTING', centerPos.x, centerPos.y + 15);
             } else if (hand.gestures.isFist) {
-                ctx.fillText('✊ FIST', centerX, centerY + 15);
+                ctx.fillText('✊ FIST', centerPos.x, centerPos.y + 15);
             } else if (hand.gestures.isOpen) {
-                ctx.fillText('✋ OPEN', centerX, centerY + 15);
+                ctx.fillText('✋ OPEN', centerPos.x, centerPos.y + 15);
             } else if (hand.gestures.isPinching) {
-                ctx.fillText('🤏 PINCH', centerX, centerY + 15);
+                ctx.fillText('🤏 PINCH', centerPos.x, centerPos.y + 15);
             }
         }
         
