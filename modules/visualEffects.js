@@ -178,7 +178,7 @@ class VisualEffects {
                 this.renderParticles();
                 break;
             case 'shapes':
-                this.renderShapes();
+                // Shapes are rendered immediately in handleShapes, no separate rendering needed
                 break;
         }
     }
